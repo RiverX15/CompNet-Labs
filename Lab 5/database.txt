@@ -1,0 +1,4 @@
+hello,hola
+die,cry
+ipv6,ipv4
+stupid,retard

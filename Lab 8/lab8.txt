@@ -1,0 +1,56 @@
+1. Select the first ICMP Echo Request message sent by your computer, and expand the Internet Protocol part of the packet in the packet details window. What is the IP address of your computer?
+>> expand packet #5
+
+2. What is a router and network solicitation message?
+>> The ICMP Router Solicitation message is sent from a computer host to any routers on the local area network to request that they advertise their presence on the network.
+
+3. Within the IP packet header, what is the value in the upper layer protocol field?
+>> udp (17 in decimal)
+
+4. How many bytes are in the IP header? How many bytes are in the payload of the IP datagram? Explain how you determined the number of payload bytes.
+>> IP header=20 Bytes, Bytes in payload of IP datagram=Total Length-IP header bytes=56-20=36 Bytes
+
+5. Has this IP datagram been fragmented? Explain how you determined whether or not the datagram has been fragmented.
+>> No because fragment offset in flags is set to 0.
+
+6. Which fields in the IP datagram always change from one datagram to the next within this series of ICMP messages sent by your computer?
+>> header checksum, identification {see packet #21,22,23 in sorted source listing}
+
+7. Which fields stay constant? Which of the fields must stay constant? Which fields must change? Why?
+>> version (IPv4), header length (20 bytes), source ip, dest ip, upper layer protocol (icmp)
+
+8. What is the value in the Identification field and the TTL field?
+>> {check packet #177} both values listed in IP header
+
+9. Do these values remain unchanged for all of the ICMP TTL-exceeded replies sent to your computer by the nearest (first hop) router? Why?
+>> identification should change (ideally), and ttl stays the same {see packets with same src}
+
+10.Find the first ICMP Echo Request message that was sent by your computer after you changed the Packet Size in pingplotter to be 2000. Has that message been fragmented across more than one IP datagram?
+>> yes. check packet #226,227
+
+11. Print out the first fragment of the fragmented IP datagram. What information in the IP header indicates that the datagram has been fragmented? What information in the IP header indicates whether this is the first fragment versus a latter fragment? How long is this IP datagram?
+>> 226	7.992984075	192.168.179.53	142.250.194.36	IPv4	1514	Fragmented IP protocol (proto=UDP 17, off=0, ID=3fd6) [Reassembled in #227]
+flags of IP header tells more fragments (#226) but not for #227, #227 has fragment offset 1480
+#226 IP datagram is 1500 bytes.
+
+12. Print out the second fragment of the fragmented IP datagram. What information in the IP header indicates that this is not the first datagram fragment? Are there more fragments? How can you tell?
+>> 227	7.993021382	192.168.179.53	142.250.194.36	UDP	534	59672 → 33434 Len=1972
+flags tell us no more fragments. not the first fragment since offset is 1480
+
+13. What fields change in the IP header between the first and second fragment? Now find the first ICMP Echo Request message that was sent by your computer after you changed the Packet Size in pingplotter to be 3500.
+>> length, flags, offset, checksum
+
+14. How many fragments were created from the original datagram?
+>> 3
+
+15. What fields change in the IP header among the fragments?
+>> The fields that change are the fragment offset (0, 1480, 2960) and checksum. The first 2 packets also have lengths of 1500 and more fragments flags set, while the last fragment is shorter (540) and does not have a flag set.
+
+
+
+SOURCES:
+https://maxwellsullivan.wordpress.com/2013/03/26/wireshark-lab-6-internet-protocol/
+https://hackmd.io/@Ray0326/Bk9pF7rso
+https://spinlab.wpi.edu/courses/ece2305_2014/lab5sol.pdf
+https://thesupplier4u.wordpress.com/wp-content/uploads/2018/04/cn-practical-6.pdf
+

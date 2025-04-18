@@ -1,0 +1,92 @@
+TASK 1
+
+>> tcp.flags.syn==1 || tcp.flags.ack==1
+to locate all SYN or ACK packets
+
+>> tcp.flags.reset==1
+to list all tcp connections which have been reset
+
+>> tcp.len>20
+to list all TCP segments which are sent and received by your machine having header lengths of more than 20 bytes.
+
+>> tcp.analysis.duplicate_ack
+to list all the duplicate ACK TCP segments
+
+>> tcp.analysis.out_of_order
+What filter will you use if you want to find the sequence number of any one out-of-order TCP segment captured in your trace file?
+
+
+TASK 2+3
+
+What is the IP address and TCP port number used by the client computer (source) that is transferring the file to gaia.cs.umass.edu?
+>> Internet Protocol Version 4, Src: 172.17.66.52, Dst: 128.119.245.12; Transmission Control Protocol, Src Port: 50536, Dst Port: 80, Seq: 0, Len: 0
+
+What is the IP address of gaia.cs.umass.edu? On what port number is it sending and receiving TCP segments for this connection?
+>> contained above
+
+What is the sequence number of the TCP SYN segment that is used to initiate the TCP connection between the client computer and gaia.cs.umass.edu? Explore the segment that identifies itself as a SYN segment?
+>> contained above
+
+What is the sequence number of the SYNACK segment sent by gaia.cs.umass.edu to the client computer in reply to the SYN? What is the value of the Acknowledgement field in the SYNACK segment? How did gaia.cs.umass.edu determine that value? What is it in the segment that identifies the segment as a SYNACK segment?
+>> Transmission Control Protocol, Src Port: 80, Dst Port: 50536, Seq: 0, Ack: 1, Len: 0
+
+What is the sequence number of the TCP segment containing the HTTP POST command? Note that in order to find the POST command, you’ll need to dig into the packet content field at the bottom of the Wireshark window, looking for a segment with a “POST” within its DATA field.
+>> Transmission Control Protocol, Src Port: 50536, Dst Port: 80, Seq: 1, Ack: 1, Len: 2896 {No. 71}
+
+Consider the TCP segment containing the HTTP POST as the first segment in the TCP connection. What are the sequence numbers of the first six segments in the TCP connection (including the segment containing the HTTP POST)? At what time was each segment sent? When was the ACK for each segment received? Given the difference between when each TCP segment was sent, and when its acknowledgement was received, what is the RTT value for each of the six segments? What is the EstimatedRTT value after the receipt of each ACK? Assume that the value of the EstimatedRTT is equal to the measured RTT for the first segment, and then is computed using the EstimatedRTT equation for all subsequent segments.
+>> packet 71 onwards
+http-ack pair	rtt	est. rtt (alpha=0.25)
+71-94		0.234	0.234
+72-97		0.234	0.234
+73-98		0.233
+74-99		0.233
+75-100		0.233
+95-130		0.234
+
+What is the length of each of the first six TCP segments?
+>> 2962 {length tab}
+
+What is the minimum amount of available buffer space advertised at the received for the entire trace? Does the lack of receiver buffer space ever throttle the sender?
+>> 272 {#94, just below flags}
+
+Are there any retransmitted segments in the trace file? What did you check for (in the trace) in order to answer this question?
+>> no, check Time-Sequence-Graph (Stevens)
+
+How much data does the receiver typically acknowledge in an ACK? Can you identify cases where the receiver is ACKing every other received segment?
+>> 2896 {difference between consecutive ACKs}
+
+What is the throughput (bytes transferred per unit time) for the TCP connection?
+>> # of bytes transferred=ack# of last ack from server - seq# of first tcp segment = 152969-1=152968 bytes {packet# 71, 239}
+transmission time = 2.554672449-1.616927774 = ... seconds
+throughput = 159.3 Kb/s
+
+
+TASK 4
+
+Identify where TCP’s slow-start phase begins and ends, and where congestion avoidance takes over?
+>> slow start till t=0.75s, after that congestion {see using approx 2x growth during slow start, then linear congestion avoid}
+
+
+TASK 5
+
+Select one UDP packet from your trace. From this packet, determine how many fields there are in the UDP header. Name these fields.
+>> see #2 packet
+
+By consulting the displayed information in Wireshark’s packet content field for this packet, determine the length (in bytes) of each of the UDP header fields.
+>> click on any header, its length is mentioned on the bottom
+
+The value in the Length field is the length of what?
+>> length in octets (Bytes) including this header and the data {8 Bytes udp header+44 Bytes data=52 Bytes for packet #2}
+
+What is the maximum number of bytes that can be included in a UDP payload? (Hint: the answer to this question can be determined by your answer to 2. above)
+>> 2^16-1=65535 Bytes is the total IP packet size. subtract 20 to get UDP datagram length, which includes the 8 Byte UDP header.
+
+What is the largest possible source port number? (Hint: see the hint in 4.)
+>> 2^16-1=65535
+
+What is the protocol number for UDP? Give your answer in both hexadecimal and decimal notation. To answer this question, you’ll need to look into the Protocol field of the IP datagram containing this UDP segment.
+>> 17 (dec), 11 (hex) {check Protocol field value in IP header}
+
+Examine a pair of UDP packets in which your host sends the first UDP packet and the second UDP packet is a reply to this first UDP packet. (Hint: for a second packet to be sent in response to a first packet, the sender of the first packet should be the destination of the second packet). What is the relationship between the port numbers in the two packets?
+>> see packet #1032, 1036 {dns packets}. src and dest port # exchange in first and reply packets.
+
