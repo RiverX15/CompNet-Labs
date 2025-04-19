@@ -1,0 +1,80 @@
+TASK 1
+
+1. Are DHCP messages sent over UDP or TCP?
+>> udp {check packets #90, 112, 117, 121}
+
+2. Draw a timing datagram illustrating the sequence of the first four-packet Discover/Offer/Request/ACK DHCP exchange between the client and server. For each packet, indicated the source and destination port numbers. Are the port numbers the same as in the example given in this lab assignment?
+>> src: 68, dst: 67 {#90}
+
+3. What is the link-layer (e.g., Ethernet) address of your host?
+>> check source header inside link layer
+08:6a:c5:83:9c:df
+
+4. What values in the DHCP discover message differentiate this message from the DHCP request message?
+>> dhcp message type {check option value inside DHCP header}
+
+5. What is the value of the Transaction-ID in each of the first four (Discover/Offer/Request/ACK) DHCP messages? What are the values of the Transaction-ID in the second set (Request/ACK) set of DHCP messages? What is the purpose of the Transaction-ID field?
+>> Transaction ID, a random number chosen by the client, used by the client and server to associate messages and responses between a client and a server.
+{check transaction id value inside dhcp header for packets #90,112,117,121}
+
+6. A host uses DHCP to obtain an IP address, among other things. But a host’s IP address is not confirmed until the end of the four-message exchange! If the IP address is not set until the end of the four-message exchange, then what values are used in the IP datagrams in the four-message exchange? For each of the four DHCP messages (Discover/Offer/Request/ACK DHCP), indicate the source and destination IP addresses that are carried in the encapsulating IP datagram.
+>> Both DHCP clients and servers use 255.255.255.255 as the destination address. The client uses the source IP address 0.0.0.0, and the server uses its actual IP address as the source.
+
+7. What is the IP address of your DHCP server?
+>> 172.17.66.3 {check packet #112 src ip}
+
+8. What IP address is the DHCP server offering to your host in the DHCP Offer message? Indicate which DHCP message contains the offered DHCP address.
+>> 172.17.66.92
+{check offer packet Your IP address value in dhcp offer header}
+
+9. In the example screenshot in this assignment, there is no relay agent between the host and the DHCP server. What values in the trace indicate the absence of a relay agent? Is there a relay agent in your experiment? If so, what is the IP address of the agent?
+>> "Relay agent IP address" is 0.0.0.0, which means no DHCP relay is used. No relay agent was used in my experiments.
+{check value inside dhcp header}
+
+10. Explain the purpose of the router and subnet mask lines in the DHCP offer message.
+>> The router line indicates which default gateway the client should use. The subnetmask line tells the client which subnetmask it should use.
+
+11. In the DHCP trace file noted in footnote 2, the DHCP server offers a specific IP address to the client (see also question 8. above). In the client’s response to the first server OFFER message, does the client accept this IP address? Where in the client’s RESPONSE is the client’s requested address?
+>> yes. check requested ip address value in dhcp header of dhcp request packet.
+
+12. Explain the purpose of the lease time. How long is the lease time in your experiment?
+>> The lease time refers to the expiration time of the intranet IP, which is 12 hours in the experiment
+{check ip lease time value in dhcp header of dhcp offer}
+
+13. What is the purpose of the DHCP release message? Does the DHCP server issue an acknowledgment of receipt of the client’s DHCP request? What would happen if the client’s DHCP release message is lost?
+>> The client sends a DHCP release message to the DHCP server to cancel the IP address previously provided by the DHCP server. The DHCP server will not send an acknowledgment message to the client. If a client's DHCP release message is lost, the DHCP server must wait for the lease on that IP address to expire before it can be reused for another client.
+
+14. Clear the bootp filter from your Wireshark window. Were any ARP packets sent or received during the DHCP packet-exchange period? If so, explain the purpose of those ARP packets.
+>> Yes, the DHCP server will issue ARP requests. Before offering an IP address to a client, the DHCP server issues an ARP request to ensure that the offered IP address is not taken by another workstation.
+
+
+TASK 2
+
+1. What are the hexadecimal values for the source and destination addresses in the Ethernet frame containing the ARP request message?
+>> check packet #2 ethernet header
+
+2. Give the hexadecimal value for the two-byte Ethernet Frame type field. What upper layer protocol does this correspond to?
+>> check type value in ethernet header.
+0x0806 (ARP)
+
+3. Download the ARP specification from ftp://ftp.rfc-editor.org/in-notes/std/std37.txt. A readable, detailed discussion of ARP is also at http://www.erg.abdn.ac.uk/users/gorry/course/inet-pages/arp.html
+	a. How many bytes from the very beginning of the Ethernet frame does the ARP opcode field begin?
+	>> 34 bytes (Ethernet 28 bytes, Hardware type 2 bytes, protocol type 2 bytes, hardware size 1 byte, protocol size 1 bute)
+	b. What is the value of the opcode field within the ARP-payload part of the Ethernet frame in which an ARP request is made?
+	>> request (1) {check packet #2 opcode value in arp header}
+	c. Does the ARP message contain the IP address of the sender?
+	>> yes
+	d. Where in the ARP request does the “question” appear – the Ethernet address of the machine whose corresponding IP address is being queried?
+	>> The field "target MAC address" is set to 00:00:00:00:00:00 to question the machine whose corresponding IP address (192.168.1.1) is being queried.
+
+4. Now find the ARP reply that was sent in response to the ARP request.
+	a. How many bytes from the very beginning of the Ethernet frame does the ARP opcode field begin?	
+	>> 34 bytes (Ethernet 28 bytes, Hardware type 2 bytes, protocol type 2 bytes, hardware size 1 byte, protocol size 1 bute)
+	b. What is the value of the opcode field within the ARP-payload part of the Ethernet frame in which an ARP response is made?
+	>> reply (2) {check packet #158}
+	c. Where in the ARP message does the “answer” to the earlier ARP request appear – the IP address of the machine having the Ethernet address whose corresponding IP address is being queried?
+	>>  In sender MAC address
+	
+5. What are the hexadecimal values for the source and destination addresses in the Ethernet frame containing the ARP reply message?
+>> Ethernet II, Src: 2a:9f:36:87:7c:76 (2a:9f:36:87:7c:76), Dst: IntelCor_83:9c:df (08:6a:c5:83:9c:df)
+
