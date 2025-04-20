@@ -11,6 +11,7 @@
 #define BUFLEN 512
 #define PORT 8882
 #define RETRANSMISSION_TIME 2
+#define MOD 10
 
 typedef struct packet {
     unsigned int size;
@@ -46,12 +47,18 @@ int main(void) {
     PACKET rcv_pkt, ack_pkt;
     socklen_t client_addr_len=sizeof(client_addr);
     int recv_len;
+    int r;
     while (1) {
         switch(state)
         {
             case 0:
             if ((recv_len=recvfrom(client_sock, &rcv_pkt, sizeof(rcv_pkt), 0, (struct sockaddr *)&client_addr, &client_addr_len))==-1) {
                 die("recvfrom()");
+            }
+            r=rand();
+            if (r%10==1) {
+                printf("DROP DATA: Seq. No. %d of size %d bytes\n", rcv_pkt.seq_num, rcv_pkt.size);
+                rcv_pkt.seq_num=-1;
             }
             if (rcv_pkt.is_data && !rcv_pkt.seq_num) {
                 printf("RECEIVED DATA: Seq. No. %d of size %d bytes\n", rcv_pkt.seq_num, rcv_pkt.size);
@@ -77,6 +84,11 @@ int main(void) {
             case 1:
             if ((recv_len=recvfrom(client_sock, &rcv_pkt, sizeof(rcv_pkt), 0, (struct sockaddr *)&client_addr, &client_addr_len))==-1) {
                 die("recvfrom()");
+            }
+            r=rand();
+            if (r%10==1) {
+                printf("DROP DATA: Seq. No. %d of size %d bytes\n", rcv_pkt.seq_num, rcv_pkt.size);
+                rcv_pkt.seq_num=-1;
             }
             if (rcv_pkt.is_data && rcv_pkt.seq_num==1) {
                 printf("RECEIVED DATA: Seq. No. %d of size %d bytes\n", rcv_pkt.seq_num, rcv_pkt.size);
